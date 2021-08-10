@@ -116,7 +116,7 @@ def token_required(f):
 
 @application.route("/")
 def index():
-    return "Hello"
+    return render_template("index.html")
 
 
 @application.route("/login", methods=["GET", "POST"])
