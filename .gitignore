@@ -1,0 +1,10 @@
+venv
+.vscode
+data.db
+.DS_Store
+settings.py
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
