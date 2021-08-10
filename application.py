@@ -11,6 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from functools import wraps
 import datetime
+import os
 import jwt
 import uuid
 from flask_wtf import FlaskForm
@@ -29,6 +30,11 @@ from settings import db_string
 
 application = Flask(__name__)
 application.config["SECRET_KEY"] = "shh"  # Maybe add to environment variables
+db_string = (
+    "mysql+pymysql://admin:"
+    + os.environ.get("DB_PASS")
+    + "@database-1.cbirreanhslc.us-east-2.rds.amazonaws.com/ships"
+)
 application.config["SQLALCHEMY_DATABASE_URI"] = db_string
 Bootstrap(application)
 db = SQLAlchemy(application)
