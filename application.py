@@ -26,7 +26,6 @@ from flask_login import (
     logout_user,
     current_user,
 )
-from settings import db_string
 
 application = Flask(__name__)
 application.config["SECRET_KEY"] = "shh"  # Maybe add to environment variables
