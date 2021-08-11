@@ -13,6 +13,8 @@ The app will need the following environment variables to be set:
 FLASK_APP=application.py  
 FLASK_ENV=development  
 
+Currently you will need to input the password for you database as DB_PASS environment variable. You will also need to edit line 32 in application.py to add your database url string.
+
 If you are using a new Linux VM, you may have to install wheel.
 
 ```bash

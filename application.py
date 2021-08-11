@@ -90,10 +90,14 @@ class Ship(db.Model):
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+
         token = None
 
         if "x-access-token" in request.headers:
             token = request.headers["x-access-token"]
+
+        elif current_user.is_authenticated:
+            return f(current_user, *args, **kwargs)
 
         if not token:
             return jsonify({"message": "Missing Token"}), 401
@@ -124,12 +128,10 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        generated = generate_password_hash(form.password.data)
-        print("Password len: ", len(user.password))
-        print("Generated len:", len(generated))
+
         if not user:
             return make_response(
-                "Login Failed",
+                "Login Failed. User does not exist",
                 401,
                 {"WWW-Authenticate": 'Basic realm="Login Required"'},
             )
@@ -144,11 +146,12 @@ def login():
                 application.config["SECRET_KEY"],
                 algorithm="HS256",
             )
-            return jsonify({"token": token})
+            # return jsonify({"token": token})
+            return redirect(url_for("dashboard"))
 
         else:
             return make_response(
-                "Login Failed2",
+                "Login Failed",
                 401,
                 {"WWW-Authenticate": 'Basic realm="Login Required"'},
             )
@@ -156,9 +159,12 @@ def login():
     return render_template("login.html", form=form)
 
 
+# Signup form submissions can be GET but are done as POST for security and performance reasons.
 @application.route("/signup", methods=["GET", "POST"])
 def signup():
     form = RegisterForm()
+    # validate_on_submit() will return False when the page is loaded causing the render_template()
+    # and then True when the form is submitted.
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data, method="sha256")
         new_user = User(
@@ -171,20 +177,51 @@ def signup():
         db.session.commit()
 
         return "<h1>New user has been created</h1>"
-        # return (
-        #     "<h1>"
-        #     + form.username.data
-        #     + " "
-        #     + form.email.data
-        #     + " "
-        #     + form.password.data
-        #     + "</h1>"
-        # )
+
     return render_template("signup.html", form=form)
+
+
+@application.route("/gettoken", methods=["GET", "POST"])
+def gettoken():
+    auth = request.authorization
+    if not auth or not auth.username or not auth.password:
+        return make_response(
+            "Login Failed",
+            401,
+            {"WWW-Authenticate": 'Basic realm="Login Required"'},
+        )
+    user = User.query.filter_by(username=auth.username).first()
+
+    if not user:
+        return make_response(
+            "Login Failed. User does not exist",
+            401,
+            {"WWW-Authenticate": 'Basic realm="Login Required"'},
+        )
+
+    if check_password_hash(user.password, auth.password):
+
+        token = jwt.encode(
+            {
+                "public_id": user.public_id,
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            },
+            application.config["SECRET_KEY"],
+            algorithm="HS256",
+        )
+        return jsonify({"token": token})
+
+    else:
+        return make_response(
+            "Login Failed",
+            401,
+            {"WWW-Authenticate": 'Basic realm="Login Required"'},
+        )
 
 
 @application.route("/dashboard")
 @login_required
+# @token_required
 def dashboard():
     return render_template("dashboard.html", name=current_user.username)
 
@@ -194,6 +231,18 @@ def dashboard():
 def logout():
     logout_user()
     return redirect(url_for("index"))
+
+
+@application.route("/login_ships", methods=["GET"])
+@login_required
+def show_ships():
+    ships = Ship.query.all()
+
+    output = []
+    for ship in ships:
+        ship_data = {"name": ship.name, "description": ship.description}
+        output.append(ship_data)
+    return render_template("ships.html", title="ships", ship_list=output)
 
 
 @application.route("/ships", methods=["GET"])
@@ -233,6 +282,22 @@ def delete_ship(current_user, id):
     db.session.delete(ship)
     db.session.commit()
     return {"message": "Don't get cocky!"}
+
+
+@application.route("/show_token")
+@login_required
+def your_flask_funtion():
+    uname = current_user.username
+    user = User.query.filter_by(username=uname).first()
+    token = jwt.encode(
+        {
+            "public_id": user.public_id,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+        },
+        application.config["SECRET_KEY"],
+        algorithm="HS256",
+    )
+    return jsonify({"token": token})
 
 
 if __name__ == "__main__":
