@@ -8,7 +8,17 @@
 </head>
 
 <body>
-    {% for ship in ship_list %}
-    <p>{{ ship }} </p>
-    {% endfor %}
+    <table style="width:100%">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+        {% for ship in ship_list %}
+        <tr>
+            <td>{{ ship['name'] }}</td>
+            <td>{{ ship['description']}}</td>
+
+        </tr>
+        {% endfor %}
+    </table>
 </body>
