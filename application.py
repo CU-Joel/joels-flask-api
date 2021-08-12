@@ -96,9 +96,6 @@ def token_required(f):
         if "x-access-token" in request.headers:
             token = request.headers["x-access-token"]
 
-        elif current_user.is_authenticated:
-            return f(current_user, *args, **kwargs)
-
         if not token:
             return jsonify({"message": "Missing Token"}), 401
 
@@ -221,7 +218,6 @@ def gettoken():
 
 @application.route("/dashboard")
 @login_required
-# @token_required
 def dashboard():
     return render_template("dashboard.html", name=current_user.username)
 
@@ -253,7 +249,7 @@ def get_ships(current_user):
     output = []
     for ship in ships:
         ship_data = {"name": ship.name, "description": ship.description}
-        output.applicationend(ship_data)
+        output.append(ship_data)
     return {"ships": output}
 
 
