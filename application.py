@@ -27,8 +27,11 @@ from flask_login import (
     current_user,
 )
 
+# Initialize the flask server
 application = Flask(__name__)
-application.config["SECRET_KEY"] = "shh"  # Maybe add to environment variables
+application.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY"
+)  # Secret used for generating JWTs and in Flask CSRF
 db_string = (
     "mysql+pymysql://admin:"
     + os.environ.get("DB_PASS")
@@ -41,7 +44,8 @@ login_manager = LoginManager()
 login_manager.init_app(application)
 login_manager.login_view = "login"
 
-
+# Calling db.create_all() will create this table in the db. It is not done in this program
+# but it is done in the setup in the Readme. It is used to add rows to the database in this program.
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
@@ -50,11 +54,21 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(120))
 
 
+class Ship(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+    description = db.Column(db.String(120))
+
+    def __repr__(self):
+        return f"{self.name} - {self.description}"
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+# Sets the parameters for the login page form
 class LoginForm(FlaskForm):
     username = StringField(
         "username", validators=[InputRequired(), Length(min=4, max=15)]
@@ -65,6 +79,7 @@ class LoginForm(FlaskForm):
     remember = BooleanField("remember me")
 
 
+# Sets the parameters for the registration form fields
 class RegisterForm(FlaskForm):
     email = StringField(
         "email",
@@ -78,15 +93,7 @@ class RegisterForm(FlaskForm):
     )
 
 
-class Ship(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-    description = db.Column(db.String(120))
-
-    def __repr__(self):
-        return f"{self.name} - {self.description}"
-
-
+# Decorator that is wrapped around routes that require login
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -115,6 +122,7 @@ def token_required(f):
     return decorated
 
 
+# Welcome page
 @application.route("/")
 def index():
     return render_template("index.html")
@@ -143,7 +151,6 @@ def login():
                 application.config["SECRET_KEY"],
                 algorithm="HS256",
             )
-            # return jsonify({"token": token})
             return redirect(url_for("dashboard"))
 
         else:
@@ -178,6 +185,7 @@ def signup():
     return render_template("signup.html", form=form)
 
 
+# Returns a JSON Web Token
 @application.route("/gettoken", methods=["GET", "POST"])
 def gettoken():
     auth = request.authorization
