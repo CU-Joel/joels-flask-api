@@ -28,8 +28,9 @@ from flask_login import (
 )
 
 # Initialize the flask server
-application = Flask(__name__, instance_relative_config=True)
-application.config.from_object("config")
+application = Flask(__name__)
+# , instance_relative_config=True
+# application.config.from_object("config")
 # application.config.from_pyfile("config.py")
 application.config.from_envvar("APP_CONFIG_FILE")
 # application.config["SECRET_KEY"] = os.environ.get(
