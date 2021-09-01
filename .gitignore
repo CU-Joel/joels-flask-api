@@ -2,7 +2,7 @@ venv
 .vscode
 data.db
 .DS_Store
-instance/
+envvars.sh
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
