@@ -2,8 +2,7 @@ venv
 .vscode
 data.db
 .DS_Store
-settings.py
-
+instance/
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

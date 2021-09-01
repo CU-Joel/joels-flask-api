@@ -28,16 +28,17 @@ from flask_login import (
 )
 
 # Initialize the flask server
-application = Flask(__name__)
-application.config["SECRET_KEY"] = os.environ.get(
-    "SECRET_KEY"
-)  # Secret used for generating JWTs and in Flask CSRF
-db_string = (
-    "mysql+pymysql://admin:"
-    + os.environ.get("DB_PASS")
-    + "@database-1.cbirreanhslc.us-east-2.rds.amazonaws.com/ships"
-)
-application.config["SQLALCHEMY_DATABASE_URI"] = db_string
+application = Flask(__name__, instance_relative_config=True)
+application.config.from_object("config")
+# application.config.from_pyfile("config.py")
+application.config.from_envvar("APP_CONFIG_FILE")
+# application.config["SECRET_KEY"] = os.environ.get(
+#     "SECRET_KEY"
+# )  # Secret used for generating JWTs and in Flask CSRF
+
+# For demo only
+# db_string = DB_URI
+# application.config["SQLALCHEMY_DATABASE_URI"] = db_string
 Bootstrap(application)
 db = SQLAlchemy(application)
 login_manager = LoginManager()
@@ -93,8 +94,9 @@ class RegisterForm(FlaskForm):
     )
 
 
-# Decorator that is wrapped around routes that require login
 def token_required(f):
+    """Decorator that is wrapped around routes that require login preventing access unelss user is logged in"""
+
     @wraps(f)
     def decorated(*args, **kwargs):
 
@@ -117,6 +119,7 @@ def token_required(f):
         except:
             return jsonify({"message": "Invalid Token"}), 401
 
+        # Reason for args
         return f(current_user, *args, **kwargs)
 
     return decorated
@@ -125,11 +128,13 @@ def token_required(f):
 # Welcome page
 @application.route("/")
 def index():
+    """Index page returns index.html"""
     return render_template("index.html")
 
 
 @application.route("/login", methods=["GET", "POST"])
 def login():
+    """User login page for users that have already signed up"""
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -166,6 +171,7 @@ def login():
 # Signup form submissions can be GET but are done as POST for security and performance reasons.
 @application.route("/signup", methods=["GET", "POST"])
 def signup():
+    """Signup page which allows new users to signup, hashes and stores the password in the database,"""
     form = RegisterForm()
     # validate_on_submit() will return False when the page is loaded causing the render_template()
     # and then True when the form is submitted.
@@ -240,8 +246,8 @@ def logout():
 @application.route("/login_ships", methods=["GET"])
 @login_required
 def show_ships():
+    """Return the existing ships from database in HTML format"""
     ships = Ship.query.all()
-
     output = []
     for ship in ships:
         ship_data = {"name": ship.name, "description": ship.description}
@@ -252,8 +258,8 @@ def show_ships():
 @application.route("/ships", methods=["GET"])
 @token_required
 def get_ships(current_user):
+    """Return the existing ships from database in JSON format"""
     ships = Ship.query.all()
-
     output = []
     for ship in ships:
         ship_data = {"name": ship.name, "description": ship.description}
