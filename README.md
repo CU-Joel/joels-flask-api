@@ -10,10 +10,13 @@ You will need to install the dependencies in requirements.txt. You can run the f
 
 The app will need the following environment variables to be set:
 
-FLASK_APP=application.py  
+FLASK_APP=joels_flask_api  
 FLASK_ENV=development  
 
-Currently you will need to input the password for you database as DB_PASS environment variable. You will also need to edit line 32 in application.py to add your database url string.
+You will also need to set these variables to your apropriate settings:  
+
+SQLALCHEMY_DATABASE_URI  
+SECRET_KEY  
 
 If you are using a new Linux VM, you may have to install wheel.
 
