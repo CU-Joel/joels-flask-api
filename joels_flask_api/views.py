@@ -7,7 +7,8 @@ from flask import (
     jsonify,
     make_response,
 )
-from joels_flask_api.models import db
+
+from joels_flask_api.models import db, User, Ship
 from flask_bootstrap import Bootstrap
 from functools import wraps
 import datetime
