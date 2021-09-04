@@ -1,0 +1,26 @@
+venv
+.vscode
+data.db
+.DS_Store
+setenv.sh
+
+# Flask
+venv/
+*.pyc
+__pycache__/
+instance/
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.idea/
+*.swp
+*~
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
