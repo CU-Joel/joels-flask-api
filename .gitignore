@@ -2,7 +2,8 @@ venv
 .vscode
 data.db
 .DS_Store
-envvars.sh
+joels_flask_api.egg-info/
+setenv.sh
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
