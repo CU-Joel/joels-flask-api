@@ -1,4 +1,4 @@
-from joels_flask_api import application
+from application import application
 from flask import (
     request,
     render_template,
@@ -8,16 +8,14 @@ from flask import (
     make_response,
 )
 
-from joels_flask_api.models import db, User, Ship
+from models import db, User, Ship
 from flask_bootstrap import Bootstrap
 from functools import wraps
 import datetime
 import os
 import jwt
 import uuid
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField
-from wtforms.validators import InputRequired, Email, Length
+from forms import LoginForm, RegisterForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import (
     LoginManager,
@@ -49,31 +47,6 @@ login_manager.login_view = "login"
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
-# Sets the parameters for the login page form
-class LoginForm(FlaskForm):
-    username = StringField(
-        "username", validators=[InputRequired(), Length(min=4, max=15)]
-    )
-    password = PasswordField(
-        "password", validators=[InputRequired(), Length(min=8, max=80)]
-    )
-    remember = BooleanField("remember me")
-
-
-# Sets the parameters for the registration form fields
-class RegisterForm(FlaskForm):
-    email = StringField(
-        "email",
-        validators=[InputRequired(), Email(message="Invalid email"), Length(max=60)],
-    )
-    username = StringField(
-        "username", validators=[InputRequired(), Length(min=4, max=15)]
-    )
-    password = PasswordField(
-        "password", validators=[InputRequired(), Length(min=8, max=80)]
-    )
 
 
 def token_required(f):
