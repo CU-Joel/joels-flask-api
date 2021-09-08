@@ -1,9 +1,24 @@
-venv
 .vscode
 data.db
 .DS_Store
-joels_flask_api.egg-info/
 setenv.sh
+
+# Flask
+venv/
+*.pyc
+__pycache__/
+instance/
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.idea/
+*.swp
+*~
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
